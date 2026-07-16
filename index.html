@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Contador de Assistência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#121017;
+    --surface:#1c1926;
+    --surface2:#252131;
+    --accent:#c9a6ff;
+    --accent2:#7ee3c9;
+    --accent3:#ffcf86;
+    --danger:#ff8a80;
+    --text:#f1edf7;
+    --text-dim:#a89fb8;
+    --border:#332e42;
+    --radius:20px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, #241f33 0%, transparent 45%),
+      radial-gradient(circle at 90% 20%, #1e2b2a 0%, transparent 40%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:18px 14px 96px;
+  }
+  header{
+    text-align:center;
+    margin-bottom:18px;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:1.5rem;
+    font-weight:700;
+    margin:4px 0 2px;
+    letter-spacing:.3px;
+  }
+  .sub{
+    font-family:'Caveat',cursive;
+    color:var(--accent2);
+    font-size:1.15rem;
+    margin:0;
+  }
+
+  .total-card{
+    background:linear-gradient(135deg,var(--surface2),var(--surface));
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+  .total-label{
+    font-size:.8rem;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  .total-value{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:2.4rem;
+    font-weight:700;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .total-icon{font-size:2rem; opacity:.85;}
+
+  #grid-presencial, #grid-zoom{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  @media(min-width:520px){
+    #grid-presencial, #grid-zoom{grid-template-columns:1fr 1fr;}
+  }
+
+  .row-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    animation:pop .25s ease;
+  }
+  @keyframes pop{
+    from{opacity:0; transform:scale(.94);}
+    to{opacity:1; transform:scale(1);}
+  }
+  .row-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+  }
+  .row-name{
+    background:transparent;
+    border:none;
+    color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:1rem;
+    font-weight:600;
+    width:100%;
+    outline:none;
+    border-bottom:1px dashed transparent;
+  }
+  .row-name:focus{border-bottom:1px dashed var(--accent);}
+  .del-btn{
+    background:none;
+    border:none;
+    color:var(--danger);
+    font-size:1.2rem;
+    line-height:1;
+    padding:4px 6px;
+    border-radius:8px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .del-btn:active{background:rgba(255,138,128,.15);}
+
+  .counter{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--surface2);
+    border-radius:14px;
+    padding:6px;
+  }
+  .counter button{
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    border:none;
+    font-size:1.4rem;
+    font-weight:700;
+    cursor:pointer;
+    color:var(--bg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .minus{background:var(--danger);}
+  .plus{background:var(--accent2);}
+  .counter button:active{transform:scale(.92);}
+  .count-value{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:1.6rem;
+    font-weight:700;
+    min-width:50px;
+    text-align:center;
+  }
+
+  #add-btn{
+    position:fixed;
+    bottom:88px;
+    left:50%;
+    transform:translateX(-50%);
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#1a1626;
+    border:none;
+    border-radius:30px;
+    padding:13px 26px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:.95rem;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    box-shadow:0 10px 30px rgba(201,166,255,.35);
+    cursor:pointer;
+    z-index:20;
+  }
+  #add-btn:active{transform:translateX(-50%) scale(.96);}
+
+  .empty{
+    text-align:center;
+    color:var(--text-dim);
+    padding:40px 10px;
+    font-family:'Caveat',cursive;
+    font-size:1.3rem;
+    grid-column:1/-1;
+  }
+
+  /* Tab bar */
+  #tabbar{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    background:rgba(28,25,38,.92);
+    backdrop-filter:blur(10px);
+    border-top:1px solid var(--border);
+    display:flex;
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+    z-index:30;
+  }
+  .tab-btn{
+    flex:1;
+    background:none;
+    border:none;
+    color:var(--text-dim);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    padding:8px 4px;
+    font-family:'Inter',sans-serif;
+    font-size:.7rem;
+    font-weight:600;
+    border-radius:14px;
+    cursor:pointer;
+  }
+  .tab-btn .icon{font-size:1.3rem;}
+  .tab-btn.active{
+    color:var(--bg);
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+  }
+
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  /* Report screen */
+  .report-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .report-card h3{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:1rem;
+    margin:0 0 12px;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    font-weight:600;
+  }
+  .compare-row{
+    display:flex;
+    justify-content:space-around;
+    text-align:center;
+    margin-bottom:14px;
+  }
+  .compare-item .val{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:1.8rem;
+    font-weight:700;
+  }
+  .compare-item .lbl{
+    font-size:.75rem;
+    color:var(--text-dim);
+  }
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;}
+  canvas{width:100%; display:block;}
+  .breakdown-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:8px 0;
+    border-bottom:1px solid var(--border);
+    font-size:.9rem;
+  }
+  .breakdown-row:last-child{border-bottom:none;}
+
+  .reg-btn{
+    width:100%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#1a1626;
+    border:none;
+    border-radius:14px;
+    padding:13px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:.95rem;
+    cursor:pointer;
+    margin-bottom:4px;
+  }
+  .reg-btn:active{transform:scale(.98);}
+  .avg-row{
+    display:flex;
+    justify-content:space-around;
+    text-align:center;
+    margin:14px 0;
+  }
+  .avg-item .val{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:1.6rem;
+    font-weight:700;
+    color:var(--accent);
+  }
+  .avg-item .lbl{
+    font-size:.72rem;
+    color:var(--text-dim);
+  }
+  .hist-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:9px 0;
+    border-bottom:1px solid var(--border);
+    font-size:.85rem;
+  }
+  .hist-row:last-child{border-bottom:none;}
+  .hist-date{color:var(--text-dim); font-size:.78rem;}
+  .hist-vals{display:flex; align-items:center; gap:10px;}
+  .hist-total{font-family:'Space Grotesk',sans-serif; font-weight:700;}
+  .hist-del{
+    background:none; border:none; color:var(--danger);
+    font-size:1rem; cursor:pointer; padding:2px 4px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Contador de Assistência</h1>
+  <p class="sub" id="sub-title">quem tá na reunião?</p>
+</header>
+
+<!-- Tela: Pessoas na Reunião -->
+<div class="screen active" id="screen-presencial">
+  <div class="total-card">
+    <div>
+      <div class="total-label">Total na reunião</div>
+      <div class="total-value" id="total-presencial">0</div>
+    </div>
+    <div class="total-icon">👥</div>
+  </div>
+  <div id="grid-presencial"></div>
+</div>
+
+<!-- Tela: Pessoas no Zoom -->
+<div class="screen" id="screen-zoom">
+  <div class="total-card">
+    <div>
+      <div class="total-label">Total no Zoom</div>
+      <div class="total-value" id="total-zoom">0</div>
+    </div>
+    <div class="total-icon">💻</div>
+  </div>
+  <div id="grid-zoom"></div>
+</div>
+
+<!-- Tela: Relatório -->
+<div class="screen" id="screen-relatorio">
+  <div class="report-card">
+    <h3>Reunião x Zoom</h3>
+    <div class="compare-row">
+      <div class="compare-item">
+        <div class="val" id="rep-presencial">0</div>
+        <div class="lbl"><span class="dot" style="background:var(--accent2)"></span>Reunião</div>
+      </div>
+      <div class="compare-item">
+        <div class="val" id="rep-zoom">0</div>
+        <div class="lbl"><span class="dot" style="background:var(--accent3)"></span>Zoom</div>
+      </div>
+      <div class="compare-item">
+        <div class="val" id="rep-geral">0</div>
+        <div class="lbl"><span class="dot" style="background:var(--accent)"></span>Geral</div>
+      </div>
+    </div>
+    <canvas id="chart-total" height="140"></canvas>
+  </div>
+
+  <div class="report-card">
+    <h3>Histórico e médias</h3>
+    <button class="reg-btn" onclick="registerToday()">📌 Registrar reunião de hoje</button>
+    <div class="avg-row">
+      <div class="avg-item">
+        <div class="val" id="avg-reuniao">0</div>
+        <div class="lbl">Média por reunião</div>
+      </div>
+      <div class="avg-item">
+        <div class="val" id="avg-mes">0</div>
+        <div class="lbl">Média por mês</div>
+      </div>
+      <div class="avg-item">
+        <div class="val" id="hist-count">0</div>
+        <div class="lbl">Reuniões registradas</div>
+      </div>
+    </div>
+    <canvas id="chart-mensal" height="140"></canvas>
+    <div id="list-historico" style="margin-top:8px;"></div>
+  </div>
+
+  <div class="report-card">
+    <h3>Por fileira — Reunião</h3>
+    <canvas id="chart-presencial" height="160"></canvas>
+    <div id="list-presencial"></div>
+  </div>
+
+  <div class="report-card">
+    <h3>Por fileira — Zoom</h3>
+    <canvas id="chart-zoom" height="160"></canvas>
+    <div id="list-zoom"></div>
+  </div>
+</div>
+
+<button id="add-btn" onclick="addRow()">＋ Adicionar fileira</button>
+
+<div id="tabbar">
+  <button class="tab-btn active" id="tab-presencial" onclick="switchTab('presencial')">
+    <span class="icon">👥</span>Reunião
+  </button>
+  <button class="tab-btn" id="tab-zoom" onclick="switchTab('zoom')">
+    <span class="icon">💻</span>Zoom
+  </button>
+  <button class="tab-btn" id="tab-relatorio" onclick="switchTab('relatorio')">
+    <span class="icon">📊</span>Relatório
+  </button>
+</div>
+
+<script>
+const KEYS = { presencial: 'contador_assistencia_presencial', zoom: 'contador_assistencia_zoom' };
+
+function loadRows(mode){
+  return JSON.parse(localStorage.getItem(KEYS[mode]) || 'null') || [
+    { id: Date.now(), name: 'Fileira 1', count: 0 }
+  ];
+}
+
+let data = {
+  presencial: loadRows('presencial'),
+  zoom: loadRows('zoom')
+};
+
+const HIST_KEY = 'contador_assistencia_historico';
+let historico = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+
+function saveHistorico(){
+  localStorage.setItem(HIST_KEY, JSON.stringify(historico));
+}
+
+let currentTab = 'presencial';
+
+function save(mode){
+  localStorage.setItem(KEYS[mode], JSON.stringify(data[mode]));
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderGrid(mode){
+  const grid = document.getElementById('grid-' + mode);
+  const rows = data[mode];
+  grid.innerHTML = '';
+
+  if(rows.length === 0){
+    grid.innerHTML = '<div class="empty">Nenhuma fileira ainda.<br>Toque em "Adicionar fileira" pra começar ✏️</div>';
+  } else {
+    rows.forEach(row => {
+      const card = document.createElement('div');
+      card.className = 'row-card';
+      card.innerHTML = `
+        <div class="row-top">
+          <input class="row-name" value="${escapeHtml(row.name)}" oninput="renameRow('${mode}', ${row.id}, this.value)">
+          <button class="del-btn" onclick="deleteRow('${mode}', ${row.id})">🗑️</button>
+        </div>
+        <div class="counter">
+          <button class="minus" onclick="changeCount('${mode}', ${row.id}, -1)">−</button>
+          <span class="count-value">${row.count}</span>
+          <button class="plus" onclick="changeCount('${mode}', ${row.id}, 1)">＋</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  const total = rows.reduce((sum, r) => sum + r.count, 0);
+  document.getElementById('total-' + mode).textContent = total;
+}
+
+function addRow(){
+  const mode = currentTab === 'relatorio' ? 'presencial' : currentTab;
+  data[mode].push({ id: Date.now(), name: `Fileira ${data[mode].length + 1}`, count: 0 });
+  save(mode);
+  renderGrid(mode);
+}
+
+function deleteRow(mode, id){
+  data[mode] = data[mode].filter(r => r.id !== id);
+  save(mode);
+  renderGrid(mode);
+}
+
+function changeCount(mode, id, delta){
+  const row = data[mode].find(r => r.id === id);
+  if(row){
+    row.count = Math.max(0, row.count + delta);
+    save(mode);
+    renderGrid(mode);
+  }
+}
+
+function renameRow(mode, id, value){
+  const row = data[mode].find(r => r.id === id);
+  if(row){
+    row.name = value;
+    save(mode);
+    document.getElementById('total-' + mode).textContent = data[mode].reduce((sum, r) => sum + r.count, 0);
+  }
+}
+
+function switchTab(tab){
+  currentTab = tab;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+
+  const subtitles = {
+    presencial: 'quem tá na reunião?',
+    zoom: 'quem tá conectado?',
+    relatorio: 'como tá a assistência?'
+  };
+  document.getElementById('sub-title').textContent = subtitles[tab];
+  document.getElementById('add-btn').style.display = tab === 'relatorio' ? 'none' : 'flex';
+
+  if(tab === 'relatorio') renderReport();
+}
+
+/* ---- Gráficos (canvas puro, sem dependências) ---- */
+function drawBarChart(canvas, items, colorFn){
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = canvas.parentElement.clientWidth - 32;
+  const cssHeight = parseInt(canvas.getAttribute('height'));
+  canvas.width = cssWidth * dpr;
+  canvas.height = cssHeight * dpr;
+  canvas.style.width = cssWidth + 'px';
+  canvas.style.height = cssHeight + 'px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+  if(items.length === 0){
+    ctx.fillStyle = '#a89fb8';
+    ctx.font = '14px Inter';
+    ctx.textAlign = 'center';
+    ctx.fillText('Sem dados ainda', cssWidth / 2, cssHeight / 2);
+    return;
+  }
+
+  const max = Math.max(1, ...items.map(i => i.value));
+  const padding = 8;
+  const gap = 10;
+  const barW = (cssWidth - padding * 2 - gap * (items.length - 1)) / items.length;
+  const chartH = cssHeight - 34;
+
+  items.forEach((item, i) => {
+    const barH = (item.value / max) * chartH;
+    const x = padding + i * (barW + gap);
+    const y = chartH - barH + 14;
+
+    const grad = ctx.createLinearGradient(0, y, 0, chartH + 14);
+    grad.addColorStop(0, colorFn(i, item));
+    grad.addColorStop(1, 'rgba(255,255,255,0.15)');
+    ctx.fillStyle = grad;
+
+    const r = 6;
+    ctx.beginPath();
+    ctx.moveTo(x, y + r);
+    ctx.arcTo(x, y, x + r, y, r);
+    ctx.arcTo(x + barW, y, x + barW, y + r, r);
+    ctx.lineTo(x + barW, chartH + 14);
+    ctx.lineTo(x, chartH + 14);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#f1edf7';
+    ctx.font = '600 13px "Space Grotesk"';
+    ctx.textAlign = 'center';
+    ctx.fillText(item.value, x + barW / 2, y - 6);
+
+    ctx.fillStyle = '#a89fb8';
+    ctx.font = '10px Inter';
+    const label = item.label.length > 8 ? item.label.slice(0, 7) + '…' : item.label;
+    ctx.fillText(label, x + barW / 2, cssHeight - 4);
+  });
+}
+
+function monthKey(iso){ return iso.slice(0, 7); } // 'YYYY-MM'
+function monthLabel(key){
+  const [y, m] = key.split('-');
+  const nomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return nomes[parseInt(m, 10) - 1] + '/' + y.slice(2);
+}
+
+function registerToday(){
+  const now = new Date();
+  const iso = now.toISOString().slice(0, 10);
+  const totalPresencial = data.presencial.reduce((s, r) => s + r.count, 0);
+  const totalZoom = data.zoom.reduce((s, r) => s + r.count, 0);
+  const geral = totalPresencial + totalZoom;
+
+  const existing = historico.find(h => h.date === iso);
+  if(existing){
+    existing.presencial = totalPresencial;
+    existing.zoom = totalZoom;
+    existing.geral = geral;
+  } else {
+    historico.push({
+      id: Date.now(),
+      date: iso,
+      dateLabel: now.toLocaleDateString('pt-BR'),
+      presencial: totalPresencial,
+      zoom: totalZoom,
+      geral: geral
+    });
+  }
+  saveHistorico();
+  renderReport();
+}
+
+function deleteHistoryEntry(id){
+  historico = historico.filter(h => h.id !== id);
+  saveHistorico();
+  renderReport();
+}
+
+function renderHistorico(){
+  const sorted = [...historico].sort((a, b) => b.date.localeCompare(a.date));
+
+  document.getElementById('hist-count').textContent = historico.length;
+
+  const avgReuniao = historico.length
+    ? Math.round((historico.reduce((s, h) => s + h.geral, 0) / historico.length) * 10) / 10
+    : 0;
+  document.getElementById('avg-reuniao').textContent = avgReuniao;
+
+  const monthMap = {};
+  historico.forEach(h => {
+    const key = monthKey(h.date);
+    monthMap[key] = (monthMap[key] || 0) + h.geral;
+  });
+  const monthKeys = Object.keys(monthMap).sort();
+  const avgMes = monthKeys.length
+    ? Math.round((monthKeys.reduce((s, k) => s + monthMap[k], 0) / monthKeys.length) * 10) / 10
+    : 0;
+  document.getElementById('avg-mes').textContent = avgMes;
+
+  drawBarChart(
+    document.getElementById('chart-mensal'),
+    monthKeys.map(k => ({ label: monthLabel(k), value: monthMap[k] })),
+    () => '#c9a6ff'
+  );
+
+  document.getElementById('list-historico').innerHTML = sorted.map(h => `
+    <div class="hist-row">
+      <span class="hist-date">${h.dateLabel}</span>
+      <div class="hist-vals">
+        <span class="hist-total">${h.geral}</span>
+        <button class="hist-del" onclick="deleteHistoryEntry(${h.id})">🗑️</button>
+      </div>
+    </div>
+  `).join('') || '<div class="hist-row"><span class="hist-date">Nenhuma reunião registrada ainda</span></div>';
+}
+
+function renderReport(){
+  const totalPresencial = data.presencial.reduce((s, r) => s + r.count, 0);
+  const totalZoom = data.zoom.reduce((s, r) => s + r.count, 0);
+
+  document.getElementById('rep-presencial').textContent = totalPresencial;
+  document.getElementById('rep-zoom').textContent = totalZoom;
+  document.getElementById('rep-geral').textContent = totalPresencial + totalZoom;
+
+  drawBarChart(
+    document.getElementById('chart-total'),
+    [
+      { label: 'Reunião', value: totalPresencial },
+      { label: 'Zoom', value: totalZoom }
+    ],
+    (i) => i === 0 ? '#7ee3c9' : '#ffcf86'
+  );
+
+  drawBarChart(
+    document.getElementById('chart-presencial'),
+    data.presencial.map(r => ({ label: r.name, value: r.count })),
+    () => '#7ee3c9'
+  );
+
+  drawBarChart(
+    document.getElementById('chart-zoom'),
+    data.zoom.map(r => ({ label: r.name, value: r.count })),
+    () => '#ffcf86'
+  );
+
+  document.getElementById('list-presencial').innerHTML = data.presencial.map(r =>
+    `<div class="breakdown-row"><span>${escapeHtml(r.name)}</span><strong>${r.count}</strong></div>`
+  ).join('') || '<div class="breakdown-row"><span>Nenhuma fileira</span></div>';
+
+  document.getElementById('list-zoom').innerHTML = data.zoom.map(r =>
+    `<div class="breakdown-row"><span>${escapeHtml(r.name)}</span><strong>${r.count}</strong></div>`
+  ).join('') || '<div class="breakdown-row"><span>Nenhuma fileira</span></div>';
+
+  renderHistorico();
+}
+
+renderGrid('presencial');
+renderGrid('zoom');
+</script>
+
+</body>
+</html>
